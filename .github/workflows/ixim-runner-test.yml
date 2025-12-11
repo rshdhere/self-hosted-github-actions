@@ -1,34 +1,70 @@
-name: Iximuiz Runner Test
+name: Intense Runner Load Test
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
-  test-runner:
-    runs-on: self-hosted   # This makes the job run inside your Iximuiz VM
+  stress-test:
+    runs-on: self-hosted
 
     steps:
-      - name: Print runner info
-        run: |
-          echo "Hello from Iximuiz Labs VM!"
-          echo "Running on:"
-          uname -a
-          echo "Current directory:"
-          pwd
+      - name: Start
+        run: echo "🔥 Starting intense test on Iximuiz runner..."
 
-      - name: Check environment variables
+      - name: System info
         run: |
-          echo "HOME=$HOME"
-          echo "USER=$USER"
-          echo "HOSTNAME=$HOSTNAME"
+          echo "CPU Info:"
+          lscpu | head -20
+          echo "Memory Info:"
+          free -h
+          echo "Disk Info:"
+          df -h
 
-      - name: Clone repository
+      - name: Clone repo
         uses: actions/checkout@v3
 
-      - name: Run a simple script
+      - name: Create large directory structure
         run: |
-          echo "The runner is working correctly!"
-          ls -al
-          echo "Job finished inside Iximuiz VM."
+          echo "📁 Creating 5000 files..."
+          mkdir -p load_test
+          for i in {1..5000}; do echo "File $i" > load_test/file_$i.txt; done
+          echo "Done creating files."
+
+      - name: Calculate checksums
+        run: |
+          echo "🔐 Calculating file checksums..."
+          find load_test -type f -exec sha256sum {} \; > checksums.txt
+          echo "Checksum complete."
+
+      - name: CPU stress test (Go compilation)"
+        run: |
+          echo "🔥 Generating Go program..."
+          cat <<EOF > test.go
+          package main
+          import "fmt"
+          func main() {
+            fmt.Println("Heavy Build Test")
+          }
+          EOF
+
+          echo "🛠️ Running go build 50 times..."
+          for i in {1..50}; do go build test.go; done
+          echo "Build loop done."
+
+      - name: ZIP + Unzip Stress
+        run: |
+          echo "📦 Compressing files..."
+          zip -r load.zip load_test
+          unzip load.zip -d extracted
+          echo "ZIP/UNZIP done."
+
+      - name: Clean up
+        run: |
+          echo "🧹 Cleaning up..."
+          rm -rf load_test extracted load.zip test test.go checksums.txt
+          echo "Cleanup complete."
+
+      - name: Finished
+        run: echo "🎉 Intense test completed successfully on the Iximuiz Runner!"
