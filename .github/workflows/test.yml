@@ -7,11 +7,11 @@ on:
 
 jobs:
   stress-test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Start
-        run: echo "🔥 Starting intense test on Iximuiz runner..."
+        run: echo "🔥 Starting intense test on GitHub runner..."
 
       - name: System info
         run: |
@@ -38,7 +38,7 @@ jobs:
           find load_test -type f -exec sha256sum {} \; > checksums.txt
           echo "Checksum complete."
 
-      - name: CPU stress test (Go compilation)"
+      - name: CPU stress test (Go compilation)
         run: |
           echo "🔥 Generating Go program..."
           cat <<EOF > test.go
@@ -67,4 +67,4 @@ jobs:
           echo "Cleanup complete."
 
       - name: Finished
-        run: echo "🎉 Intense test completed successfully on the Iximuiz Runner!"
+        run: echo "🎉 Intense test completed successfully on the GitHub Runner!"
